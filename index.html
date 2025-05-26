@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic-Tac-Toe</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #1e1e2f;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 5px;
+      margin: 20px 0;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #2e2e44;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .cell:hover {
+      background: #444460;
+    }
+    #status {
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2094e1;
+      border: none;
+      color: rgb(20, 19, 19);
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #2d7bb5;
+    }
+    #modeToggle {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tic-Tac-Toe</h1>
+  <button id="modeToggle">Mode: PvP</button>
+  <div id="status">Player X's Turn</div>
+  <div class="board" id="board"></div>
+  <button onclick="resetGame()">Restart</button>
+
+  <script>
+    const board = document.getElementById('board');
+    const status = document.getElementById('status');
+    const modeToggle = document.getElementById('modeToggle');
+
+    let cells = Array(9).fill('');
+    let currentPlayer = 'X';
+    let isGameOver = false;
+    let vsComputer = false;
+
+    const winPatterns = [
+      [0,1,2], [3,4,5], [6,7,8],
+      [0,3,6], [1,4,7], [2,5,8],
+      [0,4,8], [2,4,6]
+    ];
+
+    modeToggle.addEventListener('click', () => {
+      vsComputer = !vsComputer;
+      modeToggle.innerText = vsComputer ? 'Mode: PvC' : 'Mode: PvP';
+      resetGame();
+    });
+
+    function createBoard() {
+      board.innerHTML = '';
+      cells.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.innerText = val;
+        cell.addEventListener('click', () => handleClick(i));
+        board.appendChild(cell);
+      });
+    }
+
+    function handleClick(i) {
+      if (cells[i] !== '' || isGameOver) return;
+
+      cells[i] = currentPlayer;
+      createBoard();
+      if (checkWin(currentPlayer)) {
+        status.innerText = `Player ${currentPlayer} Wins!`;
+        isGameOver = true;
+        return;
+      }
+
+      if (cells.every(c => c !== '')) {
+        status.innerText = 'Draw!';
+        isGameOver = true;
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      status.innerText = `Player ${currentPlayer}'s Turn`;
+
+      if (vsComputer && currentPlayer === 'O' && !isGameOver) {
+        setTimeout(computerMove, 500);
+      }
+    }
+
+    function computerMove() {
+      let emptyIndexes = cells.map((val, idx) => val === '' ? idx : null).filter(idx => idx !== null);
+      let choice = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+      handleClick(choice);
+    }
+
+    function checkWin(player) {
+      return winPatterns.some(pattern => pattern.every(i => cells[i] === player));
+    }
+
+    function resetGame() {
+      cells = Array(9).fill('');
+      currentPlayer = 'X';
+      isGameOver = false;
+      status.innerText = `Player ${currentPlayer}'s Turn`;
+      createBoard();
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
